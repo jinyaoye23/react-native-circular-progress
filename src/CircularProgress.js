@@ -53,20 +53,23 @@ export default class CircularProgress extends React.Component {
           width={size}
           height={size}
         >
-          <Group rotation={rotation - 90} originX={size/2} originY={size/2}>
-            { backgroundColor !== 'transparent' && (
+          <Group rotation={rotation - 90} originX={size / 2} originY={size / 2}>
+            {backgroundColor !== 'transparent' && (
               <Shape
                 d={backgroundPath}
                 stroke={backgroundColor}
                 strokeWidth={backgroundWidth != null ? backgroundWidth : width}
               />
             )}
-            <Shape
-              d={circlePath}
-              stroke={tintColor}
-              strokeWidth={width}
-              strokeCap={linecap}
-            />
+            {/* 解决fill = 0 时，顶部出现点的情况 */}
+            {fill !== 0 &&
+              <Shape
+                d={circlePath}
+                stroke={tintColor}
+                strokeWidth={width}
+                strokeCap={linecap}
+              />
+            }
           </Group>
         </Surface>
         {children && (
