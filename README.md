@@ -78,9 +78,9 @@ You can configure the passing by following props:
 - **size** – width and height of the circle
 - **width** - thickness of the lines
 - **backgroundWidth** - thickness of the background line
-- **fill** - current, percentage fill (from 0 to 100)
+- **fill** -`array|number`, current, percentage fill (from 0 to 100) 
 - **prefill** - percentage fill before the animation (from 0 to 100)
-- **tintColor** - color of a progress line
+- **tintColor** -  `array|number`, color of a progress line,
 - **backgroundColor** - color of a background for progress line. Use 'transparent' to hide
 - **rotation** - by default, progress starts from the angle = 90⦝, you can change it by setting value from -360 to 360
 - **tension** - the tension value for the spring animation (see [here](https://facebook.github.io/react-native/docs/animations.html#core-api))

@@ -18,6 +18,36 @@ export default class CircularProgress extends React.Component {
     return Math.min(100, Math.max(0, fill));
   }
 
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps.fill);
+  }
+  // 处理百分比和颜色，封装成数组对象
+  handleFillAndColor(fill, color) {
+    let ret = [];
+    if (Array.isArray(fill) && Array.isArray(color)) {
+      // 数组
+      fill.forEach((value, index) => {
+        ret.push({
+          fill: this.extractFill(value._value),
+          color: index > (color.length - 1) ? color[color.length - 1] : color[index],
+        })
+      })
+    } else {
+      ret.push({
+        fill: this.extractFill(fill),
+        color
+      })
+    }
+    ret.sort((a, b) => {
+      return b.fill - a.fill
+    })
+    return ret;
+  }
+
+  getCirclePathByFill(fill) {
+    let { size, width } = this.props;
+    return this.circlePath(size / 2, size / 2, size / 2 - width / 2, 0, (360 * .9999) * fill / 100);
+  }
   render() {
     const {
       size,
@@ -28,14 +58,13 @@ export default class CircularProgress extends React.Component {
       style,
       rotation,
       linecap,
-      children
+      children,
+      fill,
     } = this.props;
-
-    const fill = this.extractFill(this.props.fill);
     const backgroundPath = this.circlePath(size / 2, size / 2, size / 2 - width / 2, 0, 360 * .9999);
-    const circlePath = this.circlePath(size / 2, size / 2, size / 2 - width / 2, 0, (360 * .9999) * fill / 100);
     const offset = size - (width * 2);
 
+    const fillArray = this.handleFillAndColor(fill, tintColor);
     const childContainerStyle = {
       position: 'absolute',
       left: width,
@@ -46,7 +75,6 @@ export default class CircularProgress extends React.Component {
       alignItems: 'center',
       justifyContent: 'center'
     }
-
     return (
       <View style={style}>
         <Surface
@@ -61,14 +89,17 @@ export default class CircularProgress extends React.Component {
                 strokeWidth={backgroundWidth != null ? backgroundWidth : width}
               />
             )}
-            {/* 解决fill = 0 时，顶部出现点的情况 */}
-            {fill !== 0 &&
-              <Shape
-                d={circlePath}
-                stroke={tintColor}
-                strokeWidth={width}
-                strokeCap={linecap}
-              />
+            {
+              fillArray.map((value, index) => {
+                if (!value.fill) return null;
+                return <Shape
+                  key={index}
+                  d={this.getCirclePathByFill(value.fill)}
+                  stroke={value.color}
+                  strokeWidth={width}
+                  strokeCap={linecap}
+                />
+              })
             }
           </Group>
         </Surface>
@@ -85,10 +116,12 @@ export default class CircularProgress extends React.Component {
 CircularProgress.propTypes = {
   style: ViewPropTypes.style,
   size: PropTypes.number.isRequired,
-  fill: PropTypes.number.isRequired,
+  fill: PropTypes.oneOfType([PropTypes.number, PropTypes.array]).isRequired,
+  // fill: PropTypes.number.isRequired,
   width: PropTypes.number.isRequired,
   backgroundWidth: PropTypes.number,
-  tintColor: PropTypes.string,
+  tintColor: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  // tintColor: PropTypes.string,
   backgroundColor: PropTypes.string,
   rotation: PropTypes.number,
   linecap: PropTypes.string,
