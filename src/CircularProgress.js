@@ -19,7 +19,7 @@ export default class CircularProgress extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps.fill);
+    // console.log(nextProps.fill);
   }
   // 处理百分比和颜色，封装成数组对象
   handleFillAndColor(fill, color) {
