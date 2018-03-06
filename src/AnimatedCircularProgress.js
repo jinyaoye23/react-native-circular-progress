@@ -104,7 +104,8 @@ export default class AnimatedCircularProgress extends React.Component {
   render() {
     const { fill, prefill, ...other } = this.props;
     let chartFillAnimation = this.state.chartFillAnimation;
-    let animatedFill = Array.isArray(chartFillAnimation) ? chartFillAnimation[0] : chartFillAnimation;
+    // 解决[0， 50]这样的情况，没有动画的问题
+    let animatedFill = Array.isArray(chartFillAnimation) ? chartFillAnimation[chartFillAnimation.length - 1] : chartFillAnimation;
     return (
       <AnimatedProgress
         {...other}
