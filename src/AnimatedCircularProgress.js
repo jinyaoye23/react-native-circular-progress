@@ -14,9 +14,13 @@ export default class AnimatedCircularProgress extends React.Component {
 
   constructor(props) {
     super(props);
+    // preHandlerFillAndColor;
+    let fillAndColor = this.preHandlerFillAndColor(props.fill, props.tintColor);
+    this.tintColor = fillAndColor.color;
+    this.fill = fillAndColor.fill;
     this.state = {
       appState: AppState.currentState,
-      chartFillAnimation: this.getChartFillAnimation(props.fill, props.prefill),
+      chartFillAnimation: this.getChartFillAnimation(this.fill, props.prefill),
       // chartFillAnimation: new Animated.Value(props.prefill || 0)
     }
   }
@@ -30,6 +34,39 @@ export default class AnimatedCircularProgress extends React.Component {
     AppState.removeEventListener('change', this.handleAppStateChange);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.fill !== this.props.fill || nextProps.tintColor !== this.props.tintColor) {
+      let fillAndColor = this.preHandlerFillAndColor(props.fill, props.tintColor);
+      this.tintColor = fillAndColor.color;
+      this.fill = fillAndColor.fill;
+      this.setState({
+        chartFillAnimation: this.getChartFillAnimation(this.fill, props.prefill),
+      })
+    }
+  }
+  /**
+   * 预先处理fill值，如果存在两个相同的值，则只取第一个
+   * @param {*} fill 
+   * @param {*} color 
+   */
+  preHandlerFillAndColor(fill, color) {
+    let retFill = fill, retColor = color;
+    if (Array.isArray(fill)) {
+      retFill = []; retColor = [];
+      fill.forEach((value, index, array) => {
+        if (index == 0 || index !== 0 && value != array[index - 1]) {
+          retFill.push(value);
+          retColor.push(color[index]);
+        }
+      })
+    }
+    return {
+      fill: retFill,
+      color: retColor
+    }
+  }
+
+
   handleAppStateChange = nextAppState => {
     if (this.state.appState.match(/inactive|background/) &&
       nextAppState === 'active') {
@@ -37,7 +74,7 @@ export default class AnimatedCircularProgress extends React.Component {
       // backgrounded / screen is turned off. Restart the animation when the app
       // comes back to the foreground.
       this.setState({
-        chartFillAnimation: this.getChartFillAnimation(this.props.fill, this.props.prefill),
+        chartFillAnimation: this.getChartFillAnimation(this.fill, this.props.prefill),
         // chartFillAnimation: new Animated.Value(this.props.prefill || 0)
       });
       this.animateFill();
@@ -55,7 +92,7 @@ export default class AnimatedCircularProgress extends React.Component {
     if (Array.isArray(fill)) {
       // 如果是数组
       let ret = [];
-      fill.forEach((value, index) => {
+      fill.forEach((value, index, array) => {
         let val = 0;
         ret.push(new Animated.Value(val));
       })
@@ -66,12 +103,12 @@ export default class AnimatedCircularProgress extends React.Component {
     }
   }
   animateFill() {
-    const { tension, friction, onAnimationComplete, fill } = this.props;
+    const { tension, friction, onAnimationComplete } = this.props;
 
-    if (Array.isArray(fill)) {
+    if (Array.isArray(this.fill)) {
       // 如果是数组
-      let animatedArray = fill.map((value, index) => {
-        let startValue = this.state.chartFillAnimation[index];
+      let animatedArray = this.fill.map((value, index) => {
+        // let startValue = this.state.chartFillAnimation[index];
         return Animated.spring(this.state.chartFillAnimation[index], {
           toValue: value,
           tension,
@@ -104,11 +141,11 @@ export default class AnimatedCircularProgress extends React.Component {
   render() {
     const { fill, prefill, ...other } = this.props;
     let chartFillAnimation = this.state.chartFillAnimation;
-    // 解决[0， 50]这样的情况，没有动画的问题
-    let animatedFill = Array.isArray(chartFillAnimation) ? chartFillAnimation[chartFillAnimation.length - 1] : chartFillAnimation;
+    let animatedFill = Array.isArray(chartFillAnimation) ? chartFillAnimation[0] : chartFillAnimation;
     return (
       <AnimatedProgress
         {...other}
+        tintColor={this.tintColor}
         animatedFill={animatedFill}
         fill={chartFillAnimation}
       />
