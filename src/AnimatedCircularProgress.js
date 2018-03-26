@@ -36,11 +36,11 @@ export default class AnimatedCircularProgress extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.fill !== this.props.fill || nextProps.tintColor !== this.props.tintColor) {
-      let fillAndColor = this.preHandlerFillAndColor(props.fill, props.tintColor);
+      let fillAndColor = this.preHandlerFillAndColor(nextProps.fill, nextProps.tintColor);
       this.tintColor = fillAndColor.color;
       this.fill = fillAndColor.fill;
       this.setState({
-        chartFillAnimation: this.getChartFillAnimation(this.fill, props.prefill),
+        chartFillAnimation: this.getChartFillAnimation(this.fill, nextProps.prefill),
       })
     }
   }
