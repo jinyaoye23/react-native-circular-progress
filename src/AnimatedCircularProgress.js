@@ -54,7 +54,8 @@ export default class AnimatedCircularProgress extends React.Component {
     if (Array.isArray(fill)) {
       retFill = []; retColor = [];
       fill.forEach((value, index, array) => {
-        if (index == 0 || index !== 0 && value != array[index - 1]) {
+        // 解决第一段为0时第二段不显示的bug
+        if (index == 0 && value !== 0 || index !== 0 && value != array[index - 1]) {
           retFill.push(value);
           retColor.push(color[index]);
         }
